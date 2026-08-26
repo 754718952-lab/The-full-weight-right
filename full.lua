@@ -29,7 +29,7 @@ local ProtectionConfig = {
     SecretKey = "2107",
     
     -- The name of your Hub (shown in the kick message if they try to bypass)
-    HubName = "雪天中心"
+    HubName = "雪天缤纷ProMax"
 }
 
 -- [雪天缤纷Pro] 访问限制已移除: 任何人可直接使用
@@ -120,17 +120,9 @@ getgenv().NNVN_RebirthOptions     = { "Cash", "Level" }
 getgenv().NNVN_MaterialFarming    = false
 getgenv().NNVN_MaterialBait       = "Rainbow Bait"
 getgenv().NNVN_AutoNamelessMinigame = false
-getgenv().NNVN_MinigameLead = 0 -- 小游戏手动校准偏移(像素，正=提前 负=延后)
-getgenv().NNVN_MinigameMode = 1 -- 1=模拟点击 2=智能直过
 getgenv().NNVN_ReturnAfterQuestTP  = true
-getgenv().NNVN_BGM_Enabled = true              -- 启动自动播放BGM
-getgenv().NNVN_BGM_SongId  = "4727843133"      -- 雨爱(Nightcore)，未找到DJ版；可自行替换
-getgenv().NNVN_BGM_Volume  = 0.5
-getgenv().NNVN_BGM_Loop    = false
 getgenv().NNVN_FlyMode            = false
 getgenv().NNVN_FlySpeed           = 50
-getgenv().NNVN_Spinner            = false -- 旋转陀螺
-getgenv().NNVN_SpinnerSpeed       = 240   -- 旋转速度(度/秒)
 getgenv().NNVN_InfiniteJump       = false
 getgenv().NNVN_WalkOnWater        = false
 getgenv().NNVN_FullBright         = false
@@ -148,10 +140,7 @@ local WindUI
 pcall(function()
     WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 end)
-if not WindUI then warn("[雪天中心] WindUI 加载失败") return end
-
--- 全局字体：GothamBlack（醒目现代，中文自动回退渲染）
-pcall(function() WindUI:SetFont("GothamBlack") end)
+if not WindUI then warn("[雪天缤纷ProMax] WindUI 加载失败") return end
 
 -- Small Fluent-compat layer so the original hub logic can use WindUI cleanly.
 local Fluent = WindUI
@@ -329,26 +318,6 @@ local Players               = game:GetService("Players")
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")
 local RunService            = game:GetService("RunService")
 local VirtualInput          = game:GetService("VirtualInputManager")
--- 手机端触控恢复：虚拟键盘/鼠标输入会让 Roblox 切到桌面输入模式并隐藏移动摇杆，
--- 发送一个角落触摸事件把输入模式拉回触控，保住手机移动键。
-local isTouchDevice = false
-pcall(function()
-    local uis = game:GetService("UserInputService")
-    isTouchDevice = uis.TouchEnabled and not uis.MouseEnabled
-end)
-local lastTouchRestoreAt = 0
-local function RestoreTouchMode()
-    if not isTouchDevice then return end
-    local now = os.clock()
-    if now - lastTouchRestoreAt < 0.2 then return end
-    lastTouchRestoreAt = now
-    task.defer(function()
-        pcall(function()
-            VirtualInput:SendTouchEvent(1, 1, 1, Enum.UserInputState.Begin, game)
-            VirtualInput:SendTouchEvent(1, 1, 1, Enum.UserInputState.End, game)
-        end)
-    end)
-end
 local TeleportService       = game:GetService("TeleportService")
 local Lighting              = game:GetService("Lighting")
 local CoreGui               = game:GetService("CoreGui")
@@ -368,7 +337,7 @@ local PlaceId      = game.PlaceId
 -- 3. Locale
 -- ====================================================
 local T = {
-    win_title   = "◆ 雪天中心",
+    win_title   = "◆ NNVN Hub",
     win_sub     = "作者 雪天缤纷Pro | 楚新钓 v3",
     tab_fishing = "🎣 主页 --雪天缤纷",
     tab_boss    = "⚔️ 巨物战 --雪天缤纷",
@@ -906,7 +875,6 @@ local function HoldE(duration)
     VirtualInput:SendKeyEvent(true, Enum.KeyCode.E, false, game)
     task.wait(duration)
     VirtualInput:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-    RestoreTouchMode()
 end
 
 local function GetTicketCount()
@@ -1498,7 +1466,7 @@ local Window = Fluent:CreateWindow({
     Acrylic     = true,
     Transparent = true,
     Theme       = "Dark",
-    Background = "rbxassetid://133614920920944",
+    Background = "rbxassetid://124412031173230",
     BackgroundImageTransparency = 0.5,
     HideSearchBar = true,
     ScrollBarEnabled = false,
@@ -1509,11 +1477,11 @@ local Window = Fluent:CreateWindow({
     },
 })
 
-if not Window then warn("[雪天中心] WindUI 窗口初始化失败") return end
+if not Window then warn("[NNVN Hub] WindUI window failed to initialize") return end
 
 -- Thêm EditOpenButton và Tag giống hệt demo
 Window:EditOpenButton({
-    Title = "雪天中心 --雪天缤纷",
+    Title = "雪天缤纷 --雪天缤纷",
     Icon = "fish",
     CornerRadius = UDim.new(0, 16),
     StrokeThickness = 2,
@@ -1606,8 +1574,14 @@ end
 local Tabs = {
     Fishing   = Window:AddTab({ Title = T.tab_fishing,   Icon = "" }),
     Boss      = Window:AddTab({ Title = T.tab_boss,      Icon = "" }),
+    Quest     = Window:AddTab({ Title = T.tab_quest,     Icon = "" }),
+    Banner    = Window:AddTab({ Title = T.tab_banner,    Icon = "" }),
     Sell      = Window:AddTab({ Title = T.tab_sell,      Icon = "" }),
     Teleport  = Window:AddTab({ Title = T.tab_tp,        Icon = "" }),
+    BuyRod    = Window:AddTab({ Title = T.tab_buyrod,    Icon = "" }),
+    Learn     = Window:AddTab({ Title = T.tab_learn,     Icon = "" }),
+    Bait      = Window:AddTab({ Title = T.tab_bait,      Icon = "" }),
+    ESP       = Window:AddTab({ Title = T.tab_esp,       Icon = "" }),
     Extra     = Window:AddTab({ Title = T.tab_extra,     Icon = "" }),
     Hop       = Window:AddTab({ Title = T.tab_hop,       Icon = "" }),
     Info      = Window:AddTab({ Title = T.tab_info,      Icon = "" }),
@@ -1839,38 +1813,677 @@ Tabs.Boss:AddToggle("NNVN_AutoPhase2", {
     Callback = function(v) getgenv().NNVN_AutoPhase2 = v end,
 })
 
-baitSec = Tabs.Fishing:AddSection("🛒 购买鱼饵 --雪天缤纷")
-baitSec:AddDropdown("BaitSelection", {
-    Title    = "◉ 选择鱼饵类型 --雪天缤纷",
-    Values   = baitDisplayNames,
-    Default  = baitDisplayNames[1],
+namelessBossSec = Tabs.Boss:AddSection("◆ 无名章鱼")
+namelessBossSec:AddToggle("NNVN_AutoNamelessMinigame", {
+    Title    = "▶ 自动小游戏 --雪天缤纷",
+    Default  = false,
+    Callback = function(v) getgenv().NNVN_AutoNamelessMinigame = v end,
+})
+namelessBossSec:AddButton({
+    Title    = "▣ 传送到无名章鱼",
+    Callback = function()
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if not root then return end
+
+        local target = nil
+        pcall(function()
+            local ocean = Workspace:FindFirstChild("Ocean")
+            if ocean then
+                for _, obj in ipairs(ocean:GetDescendants()) do
+                    if obj:IsA("BasePart") and obj:GetAttribute("FishName") == "Nameless Octoparasite" then
+                        target = obj
+                        break
+                    end
+                end
+            end
+        end)
+
+        if target then
+            pcall(function()
+                root.CFrame = CFrame.new(target.Position + Vector3.new(0, 6, 0))
+            end)
+        else
+            TeleportToNPCWithFallback("Nameless Octoparasite")
+        end
+    end,
+})
+
+-- ====================================================
+-- 11. TAB: QUEST
+-- ====================================================
+tickSec = Tabs.Quest:AddSection("◆ 自动门票任务 --雪天缤纷")
+tickSec:AddDropdown("TicketDifficulty", {
+    Title    = "◉ 难度 --雪天缤纷",
+    Values   = {"Easy","Hard"},
+    Default  = "Easy",
+    Callback = function(v) getgenv().NNVN_TicketDifficulty = v end,
+})
+tickSec:AddToggle("StartAutoTicket", {
+    Title    = "▶ 启动自动门票任务 --雪天缤纷",
+    Default  = false,
     Callback = function(v)
-        for _, b in ipairs(baitData) do
-            if v == (BAIT_CN[b.name] or b.name).." - $"..formatPrice(b.price) then getgenv().NNVN_SelectedBait = b.name; break end
+        getgenv().NNVN_AutoTicket = v
+        if v then
+            local diff = getgenv().NNVN_TicketDifficulty or "Easy"
+            if getgenv().NNVN_TeleportToFishSpot then getgenv().NNVN_TeleportToFishSpot(diff) end
+            getgenv().NNVN_Anchor   = true
+            getgenv().NNVN_AutoCast  = true
+            getgenv().NNVN_AutoSkill = true
+            if not HasFishingRod() then pcall(EquipSlot1) end
+            if getgenv().NNVN_StartTicketLoop then getgenv().NNVN_StartTicketLoop() end
+        else
+            if getgenv().NNVN_TicketCoroutine then
+                pcall(coroutine.close, getgenv().NNVN_TicketCoroutine)
+                getgenv().NNVN_TicketCoroutine = nil
+            end
+            getgenv().NNVN_AutoUseBait        = false
+            getgenv().NNVN_AutoBoss           = false
+            getgenv().NNVN_AutoFarmSecretBoss = false
+            getgenv().NNVN_AutoBossFishing    = false
         end
     end
 })
-baitSec:AddToggle("AutoBuyBait", {
-    Title    = "▶ 自动购买鱼饵 --雪天缤纷",
+tickSec:AddToggle("AutoAcceptQuest", {
+    Title    = "▶ 自动接取任务(空闲时) --雪天缤纷",
     Default  = false,
-    Callback = function(v) getgenv().NNVN_AutoBuyBait = v end,
-})
-baitSec:AddSlider("AutoBuyBaitDelay", {
-    Title    = "• 购买延迟(秒) --雪天缤纷",
-    Default  = 3, Min = 1, Max = 60, Rounding = 1,
-    Callback = function(v) getgenv().NNVN_AutoBuyBaitDelay = v end,
-})
-baitSec:AddSlider("BaitQuantity", {
-    Title    = "• 每次购买数量 --雪天缤纷",
-    Default  = 10, Min = 1, Max = 100, Rounding = 1,
-    Callback = function(v) getgenv().NNVN_BaitQuantity = v end,
-})
-baitSec:AddSlider("NNVN_AutoBuyBaitThreshold", {
-    Title    = "⬇ 低于此数量时购买 --雪天缤纷",
-    Default  = 5, Min = 0, Max = 50, Rounding = 1,
-    Callback = function(v) getgenv().NNVN_AutoBuyBaitThreshold = v end,
+    Callback = function(v) getgenv().NNVN_AutoAcceptQuest = v end,
 })
 
+TurnInCo = nil
+tickSec:AddToggle("AutoTurnInQuest", {
+    Title    = "▶ 自动交任务(每10秒) --雪天缤纷",
+    Default  = false,
+    Callback = function(v)
+        getgenv().NNVN_AutoTurnIn = v
+        if v then
+            if TurnInCo then coroutine.close(TurnInCo); TurnInCo = nil end
+            TurnInCo = coroutine.create(function()
+                while getgenv().NNVN_AutoTurnIn do
+                    pcall(function()
+                        local diff = getgenv().NNVN_TicketDifficulty or "Easy"
+                        -- [PROX] turn-in already wraps its own TP
+                        if getgenv().NNVN_TurnInTicketQuest then getgenv().NNVN_TurnInTicketQuest(diff) end
+                        if getgenv().NNVN_ClickLeaveButton  then getgenv().NNVN_ClickLeaveButton() end
+                    end)
+                    for i = 1, 10 do
+                        if not getgenv().NNVN_AutoTurnIn then break end
+                        task.wait(1)
+                    end
+                end
+            end)
+            coroutine.resume(TurnInCo)
+        else
+            if TurnInCo then coroutine.close(TurnInCo); TurnInCo = nil end
+        end
+    end
+})
+
+manSec = Tabs.Quest:AddSection("◆ 手动交任务 --雪天缤纷")
+manSec:AddButton({ Title = "▣ 交简单任务 --雪天缤纷", Callback = function()
+    if getgenv().NNVN_TurnInTicketQuest then getgenv().NNVN_TurnInTicketQuest("Easy") end
+    if getgenv().NNVN_ClickLeaveButton  then getgenv().NNVN_ClickLeaveButton() end
+end })
+manSec:AddButton({ Title = "▣ 交困难任务 --雪天缤纷", Callback = function()
+    if getgenv().NNVN_TurnInTicketQuest then getgenv().NNVN_TurnInTicketQuest("Hard") end
+    if getgenv().NNVN_ClickLeaveButton  then getgenv().NNVN_ClickLeaveButton() end
+end })
+
+-- Daily Reward — [PROX] TP near daily NPC before each claim
+dailySec = Tabs.Quest:AddSection("◆ 自动领取每日奖励 --雪天缤纷")
+dailyCo  = nil
+dailySec:AddToggle("AutoClaimDaily", {
+    Title    = "▶ 自动领取每日奖励(1-7) --雪天缤纷",
+    Default  = false,
+    Callback = function(v)
+        getgenv().NNVN_AutoClaimDaily = v
+        if v then
+            if dailyCo then coroutine.close(dailyCo); dailyCo = nil end
+            dailyCo = coroutine.create(function()
+                while getgenv().NNVN_AutoClaimDaily do
+                    pcall(function()
+                        -- [PROX] move near daily NPC before claims
+                        TPNearDailyNPC()
+                        for i = 1, 7 do
+                            if not getgenv().NNVN_AutoClaimDaily then break end
+                            ReplicatedStorage.Events.DailyReward:FireServer(i)
+                            task.wait(getgenv().NNVN_ClaimDailyDelay or 1)
+                        end
+                    end)
+                    task.wait(5)
+                end
+            end)
+            coroutine.resume(dailyCo)
+        else
+            if dailyCo then coroutine.close(dailyCo); dailyCo = nil end
+        end
+    end
+})
+dailySec:AddSlider("ClaimDailyDelay", {
+    Title    = "◉ 领取间隔(秒) --雪天缤纷",
+    Default  = 1, Min = 0.5, Max = 5, Rounding = 0.5,
+    Callback = function(v) getgenv().NNVN_ClaimDailyDelay = v end,
+})
+
+dailyQuestSec = Tabs.Quest:AddSection("◆ 每日任务(自动) --雪天缤纷")
+dailyQuestSec:AddParagraph({
+    Title   = "检测到的任务类型 --雪天缤纷",
+    Content = "钓鱼 | 巨物任务 | 鱼饵 | 游戏时间\n巨物门票目标已跳过并通知。"
+})
+dailyQuestSec:AddButton({
+    Title    = "▣ 领取所有每日任务奖励 --雪天缤纷",
+    -- [PROX] TP near daily NPC first
+    Callback = function()
+        task.spawn(function()
+            pcall(function()
+                TPNearDailyNPC()
+                local data  = ReplicatedStorage:FindFirstChild("Data")
+                local pd    = data and data:FindFirstChild(tostring(LocalPlayer.UserId))
+                local daily = pd and pd:FindFirstChild("Quest") and pd.Quest:FindFirstChild("Daily")
+                if not daily then
+                    if getgenv().NNVN_Notify then WindUI:Notify{Title="", Content="未找到每日任务", Duration=2} end
+                    return
+                end
+                local claimed = 0
+                for _, q in ipairs(daily:GetChildren()) do
+                    pcall(function()
+                        ReplicatedStorage.Events.DailyReward:FireServer(tonumber(q.Name))
+                        claimed = claimed + 1
+                    end)
+                    task.wait(0.3)
+                end
+                if getgenv().NNVN_Notify then WindUI:Notify{Title="", Content="已发送 "..claimed.." 份每日奖励领取！", Duration=3} end
+            end)
+        end)
+    end
+})
+
+-- God Spirit
+godSec = Tabs.Quest:AddSection("◇ 神灵")
+godStatusLabel = godSec:AddParagraph({ Title = "状态 --雪天缤纷", Content = "🔴 离线" })
+godStatusCo    = nil
+godSec:AddToggle("AutoCheckGodStatus", {
+    Title    = "▶ 自动检查状态 --雪天缤纷",
+    Default  = false,
+    Callback = function(v)
+        if v then
+            if godStatusCo then coroutine.close(godStatusCo); godStatusCo = nil end
+            godStatusCo = coroutine.create(function()
+                while true do
+                    local found = GodExists()
+                    pcall(function()
+                        godStatusLabel:SetDesc(found and "🟢 Online — God Spirit in this server!" or "🔴 Offline")
+                    end)
+                    task.wait(3)
+                end
+            end)
+            coroutine.resume(godStatusCo)
+        else
+            if godStatusCo then coroutine.close(godStatusCo); godStatusCo = nil end
+            pcall(function() godStatusLabel:SetDesc("🔴 Offline") end)
+        end
+    end,
+})
+GodSpiritCo = nil
+godSec:AddToggle("AutoGodSpirit", {
+    Title    = "▶ 自动神灵(传送+互动+祈祷) --雪天缤纷",
+    Default  = false,
+    Callback = function(v)
+        getgenv().NNVN_AutoGodSpirit = v
+        if v then
+            if GodSpiritCo then coroutine.close(GodSpiritCo); GodSpiritCo = nil end
+            GodSpiritCo = coroutine.create(function()
+                while getgenv().NNVN_AutoGodSpirit do
+                    local godFolder = Workspace:FindFirstChild("NPC") and Workspace.NPC:FindFirstChild("God")
+                    if godFolder and #godFolder:GetChildren() > 0 then
+                        for _, npc in ipairs(godFolder:GetChildren()) do
+                            if not getgenv().NNVN_AutoGodSpirit then break end
+                            if npc:IsA("Model") then
+                                local data = ReplicatedStorage:FindFirstChild("Data")
+                                local pd   = data and data:FindFirstChild(tostring(LocalPlayer.UserId))
+                                local gs   = pd and pd:FindFirstChild("GodSpirit")
+                                local alreadyPrayed = gs and gs:FindFirstChild(npc.Name)
+                                    and gs[npc.Name]:IsA("BoolValue") and gs[npc.Name].Value
+                                if not alreadyPrayed then
+                                    -- [PROX] handled inside InteractWithGodNPC
+                                    InteractWithGodNPC(npc)
+                                    task.wait(1.5)
+                                    if getgenv().NNVN_Notify then
+                                        WindUI:Notify{Title="God Spirit --雪天缤纷", Content="已向 "..npc.Name, Duration=3}
+                                    end
+                                else
+                                    if getgenv().NNVN_Notify then
+                                        WindUI:Notify{Title="God Spirit --雪天缤纷", Content=npc.Name.." already prayed today", Duration=2}
+                                    end
+                                end
+                                task.wait(0.5)
+                            end
+                        end
+                        task.wait(5)
+                    else
+                        task.wait(5)
+                    end
+                end
+            end)
+            coroutine.resume(GodSpiritCo)
+        else
+            if GodSpiritCo then coroutine.close(GodSpiritCo); GodSpiritCo = nil end
+        end
+    end
+})
+godSec:AddButton({
+    Title    = "▣ 立即向所有神灵祈祷 --雪天缤纷",
+    Callback = function()
+        task.spawn(function()
+            local godFolder = Workspace:FindFirstChild("NPC") and Workspace.NPC:FindFirstChild("God")
+            if not godFolder or #godFolder:GetChildren() == 0 then
+                if getgenv().NNVN_Notify then WindUI:Notify{Title="", Content="此服务器没有神灵！", Duration=2} end
+                return
+            end
+            for _, npc in ipairs(godFolder:GetChildren()) do
+                if npc:IsA("Model") then
+                    InteractWithGodNPC(npc)
+                    task.wait(1)
+                end
+            end
+            if getgenv().NNVN_Notify then WindUI:Notify{Title="", Content="已向所有神灵祈祷！", Duration=3} end
+        end)
+    end
+})
+
+-- ====================================================
+-- 12. TAB: BANNER (Auto Gacha) — [PROX] TP near gacha NPC
+-- ====================================================
+bannerSec          = Tabs.Banner:AddSection("◆ 自动抽卡 --雪天缤纷")
+gachaBannerOptions = {"Egoless Banner", "Celestial Banner"}
+gachaAmountOptions = {"1", "10"}
+selectedBanner     = gachaBannerOptions[1]
+selectedGachaAmount = "1"
+
+bannerSec:AddDropdown("NNVN_GachaBanner", {
+    Title    = "◉ 选择卡池 --雪天缤纷",
+    Values   = gachaBannerOptions,
+    Default  = selectedBanner,
+    Callback = function(v) getgenv().NNVN_GachaBanner = v; selectedBanner = v end
+})
+bannerSec:AddDropdown("NNVN_GachaAmount", {
+    Title    = "◉ 每次抽取门票数 --雪天缤纷",
+    Values   = gachaAmountOptions,
+    Default  = "1",
+    Callback = function(v) getgenv().NNVN_GachaAmount = tonumber(v) or 1; selectedGachaAmount = v end
+})
+
+gachaCo = nil
+bannerSec:AddToggle("NNVN_AutoGacha", {
+    Title    = "▶ 自动抽卡 --雪天缤纷",
+    Default  = false,
+    Callback = function(v)
+        getgenv().NNVN_AutoGacha = v
+        if v then
+            if gachaCo then coroutine.close(gachaCo); gachaCo = nil end
+            gachaCo = coroutine.create(function()
+                while getgenv().NNVN_AutoGacha do
+                    pcall(function()
+                        local ticketCount  = GetTicketCount()
+                        local needed       = getgenv().NNVN_GachaAmount or 1
+                        local crystalCount = GetCrystals()
+                        local canRoll      = false
+                        if ticketCount >= needed then
+                            canRoll = true
+                        else
+                            local missing        = needed - ticketCount
+                            local crystalsNeeded = missing * 5
+                            if crystalCount >= crystalsNeeded then
+                                canRoll = true
+                            else
+                                WindUI:Notify{Title="Gacha --雪天缤纷", Content="门票/水晶不足！需要 "..crystalsNeeded.." (have "..crystalCount.."). Stopping.", Duration=4}
+                                getgenv().NNVN_AutoGacha = false
+                            end
+                        end
+                        if canRoll then
+                            -- [PROX] TP near gacha NPC before rolling
+                            TPNearGachaNPC()
+                            local isTen = (selectedGachaAmount == "10")
+                            ReplicatedStorage.Events.Gacha:FireServer(isTen, selectedBanner)
+                            WindUI:Notify{Title="Gacha --雪天缤纷", Content="已抽取 "..selectedGachaAmount.."x on "..selectedBanner, Duration=2}
+                        end
+                    end)
+                    task.wait(2)
+                end
+            end)
+            coroutine.resume(gachaCo)
+        else
+            if gachaCo then coroutine.close(gachaCo); gachaCo = nil end
+            WindUI:Notify{Title="Gacha --雪天缤纷", Content="已停止", Duration=2}
+        end
+    end
+})
+
+-- ====================================================
+-- 13. TAB: UPGRADE (Auto Rebirth) — [PROX] TP near rebirth NPC
+-- ====================================================
+-- ====================================================
+-- TeleportList (pre-declare for island/material features)
+-- ====================================================
+TeleportList = {
+    {name="Beginning Isle",  cf=CFrame.new(-213.939972,6.76193953,33.2846527)},
+    {name="Bamboo Isle",     cf=CFrame.new(-1184.15674,10.6356201,-84.3372498)},
+    {name="Fallout Isle",    cf=CFrame.new(-6.55301952,6.24169779,1185.16528)},
+    {name="Sovereign Isle",  cf=CFrame.new(-1248.17249,7.31857586,1208.54199)},
+    {name="Perch Isle",      cf=CFrame.new(-61.9632416,-8.2120657,-1310.39124)},
+    {name="Frost Isle",      cf=CFrame.new(-1328.79614,7.63562012,-1488.55383)},
+    {name="Coconut Isle",    cf=CFrame.new(1429.93628,7.63562012,-1478.6311)},
+    {name="Amber Isle",      cf=CFrame.new(1239.81299,10.6663065,1335.96521)},
+    {name="Battlefield Isle",cf=CFrame.new(1394.1842,9.27561855,200.794785)},
+    {name="Mistpeak Isle",   cf=CFrame.new(2611.62134,9.27561855,-81.6781845)},
+}
+
+-- ====================================================
+-- 14. TAB: CRAFT BAIT
+-- ====================================================
+matSec = Tabs.Bait:AddSection("🧰 材料刷取 --雪天缤纷")
+matSec:AddParagraph({ Title = "ℹ️ 信息 --雪天缤纷", Content = "刷取制作鱼饵所需的鱼类重量。" })
+
+matBaitOptions  = {"Rainbow Bait", "Frost Bait", "Nameless Bait"}
+selectedMatBait = getgenv().NNVN_MaterialBait or "Rainbow Bait"
+matSec:AddDropdown("NNVN_MaterialBait", {
+    Title    = "◉ 选择要制作的鱼饵 --雪天缤纷",
+    Values   = matBaitOptions,
+    Default  = selectedMatBait,
+    Callback = function(v) getgenv().NNVN_MaterialBait = v; selectedMatBait = v end
+})
+
+BAIT_RECIPES = {
+    ["Rainbow Bait"] = {
+        {name = "Colossal Tigerfish",         minKg = 3000000, maxKg = 6000000},
+        {name = "Heavenpiercer Turtle",        minKg = 3000000, maxKg = 6000000},
+        {name = "Golden Guardian Fish",        minKg = 1000000, maxKg = 3000000},
+        {name = "Crimson Electric Eel",        minKg = 3000000, maxKg = 4000000},
+    },
+    ["Frost Bait"] = {
+        {name = "Frost Kingfish",              minKg = 4000000, maxKg = 7000000},
+        {name = "Ascended Perch",              minKg = 900000,  maxKg = 1000000},
+        {name = "Primordial Kunfish Overlord", minKg = 1000000, maxKg = 1600000},
+        {name = "Warbringer Shark",            minKg = 500000,  maxKg = 800000},
+    }
+}
+
+MAT_WEATHER_REQUIRED = {
+    ["Frost Kingfish"]      = { weathers = { snowy = true, frost = true }, island = "Frost Isle",   label = "Snowy" },
+    ["Heavenpiercer Turtle"]= { weathers = { foggy = true },               island = "Coconut Isle", label = "Foggy" },
+    ["Crimson Electric Eel"]= { weathers = { thunderstorm = true },        island = "Bamboo Isle",  label = "Thunderstorm" },
+}
+MAT_FISH_CFRAME = {
+    ["Crimson Electric Eel"]  = CFrame.new(-1311.6228, 9.27561855, -17.8612099),
+    ["Heavenpiercer Turtle"]  = CFrame.new(1372.05164, 9.27561855, -1458.41187),
+}
+NAMELESS_BAIT_FARM_CFRAME = fixedPositions["Nameless Bait Farm"]
+
+matIslandNameToIsland = {}
+for _, island in ipairs(TeleportList) do matIslandNameToIsland[island.name] = island end
+
+function matGetIslandsForFish(fishName)
+    local result = {}
+    local ok, areaRarity = pcall(require, ReplicatedStorage.Info.FishingAreaRarity)
+    if not ok then return result end
+    local islandOrder = {
+        "Beginning Isle","Bamboo Isle","Fallout Isle","Sovereign Isle","Perch Isle","Frost Isle",
+        "Coconut Isle","Amber Isle","Battlefield Isle","Mistpeak Isle"
+    }
+    for _, islandName in ipairs(islandOrder) do
+        local fishList = areaRarity[islandName]
+        if fishList and fishList[fishName] then table.insert(result, islandName) end
+    end
+    return result
+end
+
+function matGetMaterialCount(fishName, minKg, maxKg)
+    local userData = ReplicatedStorage.Data:FindFirstChild(tostring(LocalPlayer.UserId))
+    if not userData then return 0 end
+    local inventory = userData:FindFirstChild("Inventory")
+    if not inventory then return 0 end
+    local count = 0
+    for _, item in pairs(inventory:GetChildren()) do
+        if item.Name == fishName then
+            local weightString = nil
+            if item:IsA("StringValue") then
+                local parts = {}
+                for part in string.gmatch(item.Value, "[^|]+") do table.insert(parts, part) end
+                if #parts >= 2 then weightString = parts[2]:gsub("^%s+", ""):gsub("%s+$", "") end
+            elseif item:IsA("NumberValue") or item:IsA("IntValue") then
+                weightString = tostring(item.Value)
+            end
+            if weightString then
+                local weight = tonumber(weightString)
+                if weight and weight >= minKg and weight <= maxKg then count = count + 1 end
+            end
+        end
+    end
+    return count
+end
+
+function matTeleportToIsland(islandName)
+    local island = matIslandNameToIsland[islandName]
+    if not island then return false end
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp.CFrame = CFrame.new(island.cf.Position) + Vector3.new(0,5,0)
+        return true
+    end
+    return false
+end
+
+function matCancelFishing()
+    local char = LocalPlayer.Character
+    if not char then return end
+    if not char:GetAttribute("Fishing") then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if root then pcall(function() ReplicatedStorage.Events.Fishing:FireServer(root.CFrame) end) end
+end
+
+function matEnableFishing()
+    if not getgenv().NNVN_MaterialPrevFlags then
+        getgenv().NNVN_MaterialPrevFlags = {
+            AutoCast = getgenv().NNVN_AutoCast,
+            Anchor = getgenv().NNVN_Anchor,
+            AutoSkill = getgenv().NNVN_AutoSkill,
+        }
+    end
+    getgenv().NNVN_AutoCast  = true
+    getgenv().NNVN_Anchor    = true
+    getgenv().NNVN_AutoSkill = true
+end
+
+function matDisableFishing()
+    local prev = getgenv().NNVN_MaterialPrevFlags
+    if prev then
+        getgenv().NNVN_AutoCast  = prev.AutoCast and true or false
+        getgenv().NNVN_Anchor    = prev.Anchor and true or false
+        getgenv().NNVN_AutoSkill = prev.AutoSkill and true or false
+    else
+        getgenv().NNVN_AutoCast  = false
+        getgenv().NNVN_Anchor    = false
+        getgenv().NNVN_AutoSkill = false
+    end
+    getgenv().NNVN_MaterialPrevFlags = nil
+end
+
+function getCurrentWeather()
+    local info = MainGui:FindFirstChild("Info")
+    if info then
+        local infoFrame = info:FindFirstChild("Info")
+        if infoFrame then
+            local weatherFrame = infoFrame:FindFirstChild("Weather")
+            if weatherFrame then
+                local val = weatherFrame:FindFirstChild("Value")
+                if val then
+                    local text = val:IsA("TextLabel") and val.Text or val.Value
+                    return text:gsub("Weather:%s*", "")
+                end
+            end
+        end
+    end
+    return "Clear"
+end
+
+matCo = nil
+materialCurrentTarget = nil
+matSec:AddToggle("NNVN_MaterialFarming", {
+    Title    = "▶ 自动刷材料 --雪天缤纷",
+    Default  = false,
+    Callback = function(v)
+        getgenv().NNVN_MaterialFarming = v
+        if v then
+            if matCo then coroutine.close(matCo); matCo = nil end
+            matCo = coroutine.create(function()
+                while getgenv().NNVN_MaterialFarming do
+                    pcall(function()
+                        if selectedMatBait == "Nameless Bait" then
+                            local char = LocalPlayer.Character
+                            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                            if hrp and NAMELESS_BAIT_FARM_CFRAME and (hrp.Position - NAMELESS_BAIT_FARM_CFRAME.Position).Magnitude > 5 then
+                                if char:GetAttribute("Fishing") then matCancelFishing(); task.wait(0.1) end
+                                hrp.CFrame = NAMELESS_BAIT_FARM_CFRAME
+                            end
+                            matEnableFishing()
+                            materialCurrentTarget = "Nameless Bait"
+                            return
+                        end
+
+                        local recipe = BAIT_RECIPES[selectedMatBait]
+                        if not recipe or #recipe == 0 then return end
+                        local targetReq, minCount = nil, math.huge
+                        for _, req in ipairs(recipe) do
+                            local c = matGetMaterialCount(req.name, req.minKg, req.maxKg)
+                            if c < minCount then minCount = c; targetReq = req end
+                        end
+                        if not targetReq then return end
+                        local fishName = targetReq.name
+                        local weather  = string.lower(getCurrentWeather())
+                        local req      = MAT_WEATHER_REQUIRED[fishName]
+                        if req then
+                            local ok = false
+                            for w in pairs(req.weathers) do if weather == w then ok = true end end
+                            if not ok then
+                                materialCurrentTarget = nil
+                                WindUI:Notify{Title="Material --雪天缤纷", Content=fishName.." requires "..req.label..". Waiting...", Duration=3}
+                                task.wait(5)
+                                return
+                            end
+                            local fishCF = MAT_FISH_CFRAME[fishName]
+                            local char   = LocalPlayer.Character
+                            local hrp    = char and char:FindFirstChild("HumanoidRootPart")
+                            if fishCF and hrp then
+                                if (hrp.Position - fishCF.Position).Magnitude > 5 then
+                                    if char:GetAttribute("Fishing") then matCancelFishing(); task.wait(0.1) end
+                                    hrp.CFrame = fishCF
+                                end
+                            else
+                                matTeleportToIsland(req.island)
+                            end
+                            matEnableFishing()
+                            materialCurrentTarget = fishName
+                            return
+                        end
+                        local islandsForFish = matGetIslandsForFish(fishName)
+                        if #islandsForFish == 0 then return end
+                        local targetIsland = matIslandNameToIsland[islandsForFish[1]]
+                        if not targetIsland then return end
+                        local char = LocalPlayer.Character
+                        local hrp  = char and char:FindFirstChild("HumanoidRootPart")
+                        if not hrp then return end
+                        if (hrp.Position - targetIsland.cf.Position).Magnitude > 5 then
+                            if char:GetAttribute("Fishing") then matCancelFishing(); task.wait(0.1) end
+                            matTeleportToIsland(islandsForFish[1])
+                        end
+                        matEnableFishing()
+                        materialCurrentTarget = fishName
+                    end)
+                    task.wait(0.5)
+                end
+                matDisableFishing()
+            end)
+            coroutine.resume(matCo)
+        else
+            if matCo then coroutine.close(matCo); matCo = nil end
+            matDisableFishing()
+            materialCurrentTarget = nil
+            WindUI:Notify{Title="Material --雪天缤纷", Content="已停止", Duration=2}
+        end
+    end
+})
+
+craftSec = Tabs.Bait:AddSection("🧪 制作鱼饵 --雪天缤纷")
+craftSec:AddParagraph({ Title = "ℹ️ 信息 --雪天缤纷", Content = "在鱼饵商处制作所选鱼饵。数量限制为 1 到 100。" })
+
+craftBaitOptions = {"Rainbow Bait", "Frost Bait", "Nameless Bait"}
+selectedCraftBait = getgenv().NNVN_CraftBaitName or "Rainbow Bait"
+craftSec:AddDropdown("NNVN_CraftBaitName", {
+    Title    = "◉ 选择鱼饵 --雪天缤纷",
+    Values   = craftBaitOptions,
+    Default  = selectedCraftBait,
+    Callback = function(v)
+        selectedCraftBait = v or "Rainbow Bait"
+        getgenv().NNVN_CraftBaitName = selectedCraftBait
+    end,
+})
+craftSec:AddInput("NNVN_CraftBaitQuantityInput", {
+    Title       = "• 制作数量 --雪天缤纷",
+    Placeholder = "1 - 100",
+    Default     = tostring(getgenv().NNVN_CraftBaitQuantity or 1),
+    Callback    = function(value)
+        craftAmount = math.clamp(math.floor(tonumber(value) or 1), 1, 100)
+        getgenv().NNVN_CraftBaitQuantity = craftAmount
+    end,
+})
+
+function CraftSelectedBait(amount)
+    craftAmount = math.clamp(math.floor(tonumber(amount) or getgenv().NNVN_CraftBaitQuantity or 1), 1, 100)
+    craftName = selectedCraftBait or getgenv().NNVN_CraftBaitName or "Rainbow Bait"
+    WithSavedPosition(function()
+        if not TPNearBaitSeller() then return end
+        task.wait(0.25)
+        ReplicatedStorage.Events.CraftBait:FireServer(craftName, craftAmount)
+        task.wait(0.25)
+    end)
+end
+
+craftSec:AddButton({
+    Title    = "▸ 制作一次 --雪天缤纷",
+    Callback = function()
+        CraftSelectedBait(getgenv().NNVN_CraftBaitQuantity or 1)
+        if getgenv().NNVN_Notify then
+            WindUI:Notify{Title="制作鱼饵 --雪天缤纷", Content="已制作 "..tostring(getgenv().NNVN_CraftBaitQuantity or 1).."x "..tostring(selectedCraftBait or "Rainbow Bait"), Duration=2}
+        end
+    end,
+})
+craftSec:AddToggle("NNVN_AutoCraftBait", {
+    Title   = "▶ 自动制作鱼饵 --雪天缤纷",
+    Default = false,
+    Callback = function(v)
+        getgenv().NNVN_AutoCraftBait = v
+        if getgenv().NNVN_Notify then
+            WindUI:Notify{Title="制作鱼饵 --雪天缤纷", Content=v and "Auto craft enabled" or "Auto craft disabled", Duration=2}
+        end
+    end,
+})
+
+if not getgenv().NNVN_AutoCraftBaitLoop then
+    getgenv().NNVN_AutoCraftBaitLoop = true
+    task.spawn(function()
+        while task.wait(3) do
+            if getgenv().NNVN_AutoCraftBait then
+                CraftSelectedBait(getgenv().NNVN_CraftBaitQuantity or 1)
+            end
+        end
+    end)
+end
+
+-- ====================================================
+-- 15. TAB: AUTO SELL — [PROX] TP near Nana before every sell
+-- ====================================================
 sellSec = Tabs.Sell:AddSection("◆ 自动出售鱼 --雪天缤纷")
 sellSec:AddToggle("NNVN_AutoSell", {
     Title    = "▶ 自动出售所有鱼 --雪天缤纷",
@@ -1894,12 +2507,12 @@ sellSec:AddButton({
         task.spawn(function()
             TPNear("Nana")
             pcall(function() ReplicatedStorage.Events.SellFish:FireServer("All") end)
-            if getgenv().NNVN_Notify then WindUI:Notify{Title="出售 --雪天缤纷", Content="已出售所有鱼！", Duration=2} end
+            if getgenv().NNVN_Notify then WindUI:Notify{Title="Sell --雪天缤纷", Content="已出售所有鱼！", Duration=2} end
         end)
     end,
 })
 sellSec:AddButton({
-    Title    = "▣ 传送到娜娜(卖鱼商人) --雪天缤纷",
+    Title    = "▣ 传送到娜娜(出售NPC) --雪天缤纷",
     Callback = function()
         pcall(function() TeleportToNPCWithFallback("Nana") end)
     end,
@@ -1920,7 +2533,7 @@ weatherIslands = {
 islandTpSec = Tabs.Teleport:AddSection("岛屿传送 --雪天缤纷")
 islandNames = {}
 for _, island in ipairs(TeleportList) do
-    table.insert(islandNames, island.cn or island.name)
+    table.insert(islandNames, island.name)
 end
 selectedIslandName = islandNames[1] or "Beginning Isle"
 islandTpSec:AddDropdown("NNVN_IslandTeleport", {
@@ -1928,9 +2541,7 @@ islandTpSec:AddDropdown("NNVN_IslandTeleport", {
     Values   = islandNames,
     Default  = selectedIslandName,
     Callback = function(v)
-        for _, island in ipairs(TeleportList) do
-            if (island.cn or island.name) == v then selectedIslandName = island.name; break end
-        end
+        selectedIslandName = v or selectedIslandName
     end,
 })
 islandTpSec:AddButton({
@@ -1939,8 +2550,7 @@ islandTpSec:AddButton({
         if not selectedIslandName then return end
         matTeleportToIsland(selectedIslandName)
         if getgenv().NNVN_Notify then
-            local isl = matIslandNameToIsland[selectedIslandName]
-            WindUI:Notify{Title="传送 --雪天缤纷", Content="已传送到 "..((isl and isl.cn) or selectedIslandName), Duration=2}
+            WindUI:Notify{Title="传送 --雪天缤纷", Content="已传送到 "..selectedIslandName, Duration=2}
         end
     end,
 })
@@ -1957,7 +2567,7 @@ Tabs.Teleport:AddButton({
         for _, v in ipairs(TeleportList) do
             if v.name:lower() == targetName:lower() then
                 TeleportToCFrame(v.cf)
-                WindUI:Notify{Title="", Content="已传送到 "..(ISLE_CN[targetName] or targetName).."（天气: "..weather.."）", Duration=3}
+                WindUI:Notify{Title="", Content="已传送到 "..targetName.." for "..weather, Duration=3}
                 return
             end
         end
@@ -1970,7 +2580,7 @@ jobIdSec = Tabs.Teleport:AddSection("◆ 按服务器ID换服 --雪天缤纷")
 lastHopAt = 0
 jobIdSec:AddInput("NNVN_JobIdInput", {
     Title       = "输入服务器 ID --雪天缤纷",
-    Placeholder = "粘贴服务器ID...",
+    Placeholder = "Paste Job ID here...",
     Default     = "",
     Callback    = function(text)
         if not text or text == "" then return end
@@ -2020,7 +2630,7 @@ secretRodData = {
 }
 secretRodTpSec = Tabs.Teleport:AddSection("◆ 隐藏鱼竿位置")
 for _, rod in ipairs(secretRodData) do
-    secretRodTpSec:AddButton({ Title = "▣ "..(SECRET_ROD_CN[rod.name] or rod.name), Callback = function()
+    secretRodTpSec:AddButton({ Title = "▣ "..rod.name, Callback = function()
         pcall(function() TeleportToCFrame(rod.cf) end)
     end })
 end
@@ -2208,6 +2818,368 @@ for seller, rods in pairs(rodGroups) do
 end
 table.sort(sortedSellers, function(a,b) return a.minPrice < b.minPrice end)
 
+for _, si in ipairs(sortedSellers) do
+    local sec = Tabs.BuyRod:AddSection("◆ "..si.seller)
+    for _, rod in ipairs(rodGroups[si.seller]) do
+        local rodRef = rod   -- capture
+        sec:AddButton({
+            Title    = "▣ "..rodRef.name.." - $"..formatPrice(rodRef.price),
+            -- [PROX] TP to that island's rod seller before buying
+            Callback = function()
+                task.spawn(function()
+                    TPNearRodSeller(rodRef.seller)
+                    pcall(function() ReplicatedStorage.Events.BuyFishingRod:FireServer(rodRef.name) end)
+                    if getgenv().NNVN_Notify then
+                        WindUI:Notify{Title="购买鱼竿 --雪天缤纷", Content="已购买 "..rodRef.name, Duration=2}
+                    end
+                end)
+            end
+        })
+    end
+end
+
+secSec = Tabs.BuyRod:AddSection("◆ 隐藏鱼竿")
+for _, rod in ipairs(secretRodData) do
+    local rodRef = rod
+    secSec:AddButton({
+        Title    = "▣ "..rodRef.name.." - "..formatPrice(rodRef.price).." gem",
+        -- [PROX] TP to secret rod location first, then buy
+        Callback = function()
+            task.spawn(function()
+                TeleportToCFrame(rodRef.cf)
+                task.wait(PROX_WAIT)
+                pcall(function() ReplicatedStorage.Events.BuyFishingRod:FireServer(rodRef.name) end)
+                if getgenv().NNVN_Notify then
+                    WindUI:Notify{Title="购买鱼竿 --雪天缤纷", Content="已购买 "..rodRef.name, Duration=2}
+                end
+            end)
+        end
+    })
+end
+
+-- ====================================================
+-- 18. TAB: LEARN SKILL — [PROX] TP near Sage Yijiu before buying
+-- ====================================================
+skillData = {
+    {name="Skyfall Stomp",          price=100},
+    {name="Infinite Sky Ascension", price=500},
+    {name="Unshake Stance",         price=1000},
+    {name="Swift Reel",             price=1200},
+    {name="Demonfall Technique",    price=1400},
+    {name="Reel Machine",           price=1600},
+    {name="Reel Sprint",            price=2000},
+    {name="Dragonfish Vitality",    price=5000},
+    {name="Skybreaker Technique",   price=16000},
+    {name="Aerial Rod Throw",       price=35000},
+    {name="Thousand Enemy Sweep",   price=40000},
+    {name="One-Strike Heaven Gate", price=50000},
+    {name="Rolling Chaos",          price=50000},
+    {name="Rooster Strike",         price=60000},
+    {name="Phoenix Strike Art",     price=100000},
+}
+skillDisplayNames = {}
+for _, s in ipairs(skillData) do
+    table.insert(skillDisplayNames, s.name.." - $"..formatPrice(s.price))
+end
+learnSec   = Tabs.Learn:AddSection("◆ 小道士大师兄")
+selSkillName = skillData[1].name
+learnSec:AddDropdown("SkillSelection", {
+    Title    = "◉ 选择钓法 --雪天缤纷",
+    Values   = skillDisplayNames,
+    Default  = skillDisplayNames[1],
+    Callback = function(v)
+        for _, s in ipairs(skillData) do
+            if v == s.name.." - $"..formatPrice(s.price) then selSkillName = s.name; break end
+        end
+    end
+})
+learnSec:AddButton({
+    Title    = "▣ 购买所选钓法 --雪天缤纷",
+    -- [PROX] TP near Sage Yijiu before buying
+    Callback = function()
+        task.spawn(function()
+            TPNear("Sage Yijiu")
+            pcall(function() ReplicatedStorage.Events.BuySkill:FireServer(selSkillName) end)
+            if getgenv().NNVN_Notify then
+                WindUI:Notify{Title="钓法 --雪天缤纷", Content="已购买 "..selSkillName, Duration=2}
+            end
+        end)
+    end
+})
+learnSec:AddButton({ Title = "▣ 传送到小道士大师兄", Callback = function()
+    TeleportToNPCWithFallback("Sage Yijiu")
+end })
+
+-- ====================================================
+-- 19. TAB: BAIT — [PROX] TP near bait seller before every buy
+-- ====================================================
+baitData = {
+    {name="Basic Bait",             price=100},
+    {name="Crude Mash Bait",        price=10000},
+    {name="Corrupted Essence Bait", price=15000},
+    {name="Elite Bait",             price=50000},
+    {name="Ancestral Bait",         price=100000},
+}
+baitDisplayNames = {}
+for _, b in ipairs(baitData) do table.insert(baitDisplayNames, b.name.." - $"..formatPrice(b.price)) end
+baitSec = Tabs.Bait:AddSection("🛒 购买鱼饵 --雪天缤纷")
+baitSec:AddDropdown("BaitSelection", {
+    Title    = "◉ 选择鱼饵类型 --雪天缤纷",
+    Values   = baitDisplayNames,
+    Default  = baitDisplayNames[1],
+    Callback = function(v)
+        for _, b in ipairs(baitData) do
+            if v == b.name.." - $"..formatPrice(b.price) then getgenv().NNVN_SelectedBait = b.name; break end
+        end
+    end
+})
+baitSec:AddToggle("AutoBuyBait", {
+    Title    = "▶ 自动购买鱼饵 --雪天缤纷",
+    Default  = false,
+    Callback = function(v) getgenv().NNVN_AutoBuyBait = v end,
+})
+baitSec:AddSlider("AutoBuyBaitDelay", {
+    Title    = "• 购买延迟(秒) --雪天缤纷",
+    Default  = 3, Min = 1, Max = 60, Rounding = 1,
+    Callback = function(v) getgenv().NNVN_AutoBuyBaitDelay = v end,
+})
+baitSec:AddSlider("BaitQuantity", {
+    Title    = "• 每次购买数量 --雪天缤纷",
+    Default  = 10, Min = 1, Max = 100, Rounding = 1,
+    Callback = function(v) getgenv().NNVN_BaitQuantity = v end,
+})
+baitSec:AddSlider("NNVN_AutoBuyBaitThreshold", {
+    Title    = "⬇ 低于此数量时购买 --雪天缤纷",
+    Default  = 5, Min = 0, Max = 50, Rounding = 1,
+    Callback = function(v) getgenv().NNVN_AutoBuyBaitThreshold = v end,
+})
+
+-- ====================================================
+-- 20. TAB: ESP (unchanged logic, same as original)
+-- ====================================================
+getgenv().NNVN_ESP = {
+    GodSpirit = false, SecretRod = false, Boats = false,
+    Maoshan   = false, Taoist = false, Boss      = false, Players = false,
+}
+espHighlights = {}
+
+function clearESP(key)
+    if espHighlights[key] then
+        for _, h in ipairs(espHighlights[key]) do pcall(function() h:Destroy() end) end
+        espHighlights[key] = nil
+    end
+end
+
+function makeHighlight(parent, fillColor, outlineColor, fillTrans, outlineTrans)
+    local h = Instance.new("Highlight")
+    h.FillColor           = fillColor    or Color3.fromRGB(255,255,0)
+    h.OutlineColor        = outlineColor or Color3.fromRGB(255,255,255)
+    h.FillTransparency    = fillTrans    or 0.5
+    h.OutlineTransparency = outlineTrans or 0
+    h.Parent              = parent
+    return h
+end
+
+function addBillboard(parent, text, color, offset)
+    local bb = Instance.new("BillboardGui")
+    bb.Size        = UDim2.new(0,200,0,40)
+    bb.StudsOffset = offset or Vector3.new(0,3,0)
+    bb.AlwaysOnTop = true
+    bb.Parent      = parent
+    local lbl = Instance.new("TextLabel", bb)
+    lbl.Size = UDim2.fromScale(1,1)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3             = color or Color3.new(1,1,1)
+    lbl.TextStrokeTransparency = 0.5
+    lbl.Text      = text
+    lbl.Font      = Enum.Font.GothamBold
+    lbl.TextScaled = true
+    return bb
+end
+
+function applyESP_GodSpirit()
+    clearESP("GodSpirit"); espHighlights["GodSpirit"] = {}
+    local g = Workspace:FindFirstChild("NPC") and Workspace.NPC:FindFirstChild("God")
+    if not g then return end
+    for _, npc in ipairs(g:GetChildren()) do
+        if npc:IsA("Model") then
+            local h  = makeHighlight(npc, Color3.fromRGB(255,215,0), Color3.fromRGB(255,165,0), 0.4, 0)
+            local bb = addBillboard(npc, "⭐ God Spirit: "..npc.Name, Color3.fromRGB(255,215,0), Vector3.new(0,5,0))
+            table.insert(espHighlights["GodSpirit"], h)
+            table.insert(espHighlights["GodSpirit"], bb)
+        end
+    end
+end
+function applyESP_SecretRod()
+    clearESP("SecretRod"); espHighlights["SecretRod"] = {}
+    local sr = Workspace:FindFirstChild("SecretRod")
+    if not sr then return end
+    for _, rod in ipairs(sr:GetChildren()) do
+        local h  = makeHighlight(rod, Color3.fromRGB(255,50,50), Color3.fromRGB(255,200,0), 0.3, 0)
+        local bb = addBillboard(rod, "🎣 "..rod.Name, Color3.fromRGB(255,200,0))
+        table.insert(espHighlights["SecretRod"], h); table.insert(espHighlights["SecretRod"], bb)
+    end
+end
+function applyESP_Boats()
+    clearESP("Boats"); espHighlights["Boats"] = {}
+    local boats = Workspace:FindFirstChild("Boat")
+    if not boats then return end
+    for _, loc in ipairs(boats:GetChildren()) do
+        for _, boat in ipairs(loc:GetChildren()) do
+            if boat:IsA("Model") then
+                local h  = makeHighlight(boat, Color3.fromRGB(0,200,255), Color3.fromRGB(255,255,255), 0.5, 0)
+                local bb = addBillboard(boat, "🚢 Boat @"..loc.Name, Color3.fromRGB(0,200,255))
+                table.insert(espHighlights["Boats"], h); table.insert(espHighlights["Boats"], bb)
+            end
+        end
+    end
+end
+function applyESP_Maoshan()
+    clearESP("Maoshan"); espHighlights["Maoshan"] = {}
+    local npc = Workspace:FindFirstChild("NPC") and Workspace.NPC:FindFirstChild("Function")
+        and Workspace.NPC.Function:FindFirstChild("Maoshan")
+    if not npc then return end
+    local h  = makeHighlight(npc, Color3.fromRGB(180,0,255), Color3.fromRGB(255,255,255), 0.4, 0)
+    local bb = addBillboard(npc, "🔮 Maoshan", Color3.fromRGB(180,0,255))
+    table.insert(espHighlights["Maoshan"], h); table.insert(espHighlights["Maoshan"], bb)
+end
+function applyESP_Taoist()
+    clearESP("Taoist"); espHighlights["Taoist"] = {}
+    local npc = Workspace:FindFirstChild("NPC") and Workspace.NPC:FindFirstChild("Function")
+        and Workspace.NPC.Function:FindFirstChild("Taoist")
+    if not npc then return end
+    local h  = makeHighlight(npc, Color3.fromRGB(255,120,0), Color3.fromRGB(255,255,255), 0.4, 0)
+    local bb = addBillboard(npc, "☯️ Taoist", Color3.fromRGB(255,120,0))
+    table.insert(espHighlights["Taoist"], h); table.insert(espHighlights["Taoist"], bb)
+end
+function applyESP_Boss()
+    clearESP("Boss"); espHighlights["Boss"] = {}
+    local bossFolder = Workspace:FindFirstChild("NPC") and Workspace.NPC:FindFirstChild("Boss")
+    if not bossFolder then return end
+    for _, b in ipairs(bossFolder:GetChildren()) do
+        if b:IsA("Model") then
+            local h  = makeHighlight(b, Color3.fromRGB(255,0,0), Color3.fromRGB(255,255,0), 0.3, 0)
+            local bb = addBillboard(b, "⚔️ BOSS: "..b.Name, Color3.fromRGB(255,80,80), Vector3.new(0,7,0))
+            table.insert(espHighlights["Boss"], h); table.insert(espHighlights["Boss"], bb)
+        end
+    end
+end
+function applyESP_Players()
+    clearESP("Players"); espHighlights["Players"] = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character then
+            local h  = makeHighlight(plr.Character, Color3.fromRGB(0,255,100), Color3.fromRGB(255,255,255), 0.5, 0)
+            local bb = addBillboard(plr.Character, "👤 "..plr.Name, Color3.fromRGB(0,255,100))
+            table.insert(espHighlights["Players"], h); table.insert(espHighlights["Players"], bb)
+        end
+    end
+end
+
+espApplyFns = {
+    GodSpirit = applyESP_GodSpirit,
+    SecretRod = applyESP_SecretRod, Boats     = applyESP_Boats,
+    Maoshan   = applyESP_Maoshan,   Taoist    = applyESP_Taoist,
+    Boss      = applyESP_Boss,      Players   = applyESP_Players,
+}
+
+task.spawn(function()
+    while true do
+        task.wait(5)
+        for key, enabled in pairs(getgenv().NNVN_ESP) do
+            if enabled then pcall(espApplyFns[key] or function() end) end
+        end
+    end
+end)
+
+espSec  = Tabs.ESP:AddSection("◆ 透视对象")
+espDefs = {
+    { key="GodSpirit", title="⭐ God Spirit ESP",  desc="Gold highlight" },
+    { key="SecretRod", title="🎣 Secret Rod ESP",  desc="Red highlight" },
+    { key="Boats",     title="🚢 Boats ESP",        desc="Cyan highlight" },
+    { key="Maoshan",   title="🔮 Maoshan ESP",     desc="Purple highlight" },
+    { key="Taoist",    title="☯️ Taoist ESP",       desc="Orange highlight" },
+    { key="Boss",      title="⚔️ Boss ESP",         desc="Red highlight" },
+    { key="Players",   title="👤 Players ESP",      desc="Green highlight" },
+}
+for _, def in ipairs(espDefs) do
+    espSec:AddToggle("ESP_"..def.key, {
+        Title = def.title, Description = def.desc, Default = false,
+        Callback = function(v)
+            getgenv().NNVN_ESP[def.key] = v
+            if v then pcall(espApplyFns[def.key] or function() end) else clearESP(def.key) end
+        end,
+    })
+end
+espSec:AddButton({ Title = "▣ 刷新所有透视 --雪天缤纷", Callback = function()
+    for key, enabled in pairs(getgenv().NNVN_ESP) do
+        if enabled then pcall(espApplyFns[key] or function() end) end
+    end
+    if getgenv().NNVN_Notify then WindUI:Notify{Title="", Content="透视已刷新！", Duration=2} end
+end })
+espSec:AddButton({ Title = "▣ 清除所有透视 --雪天缤纷", Callback = function()
+    for key in pairs(getgenv().NNVN_ESP) do
+        getgenv().NNVN_ESP[key] = false; clearESP(key)
+    end
+    if getgenv().NNVN_Notify then WindUI:Notify{Title="", Content="已清除所有透视！", Duration=2} end
+end })
+
+local function GetIndexRemoteCandidates()
+    local events = ReplicatedStorage:FindFirstChild("Events")
+    if not events then return {} end
+
+    local matches = {}
+    for _, obj in ipairs(events:GetDescendants()) do
+        local lowerName = string.lower(obj.Name or "")
+        if (obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction")) and (
+            lowerName:find("index") or
+            lowerName:find("unlock") or
+            lowerName:find("discover") or
+            lowerName:find("journal") or
+            lowerName:find("bestiary") or
+            lowerName:find("collection")
+        ) then
+            table.insert(matches, obj)
+        end
+    end
+
+    return matches
+end
+
+local function TryUnlockAllIndexRisk()
+    local fishNames = GetAllFishNames()
+    local remotes = GetIndexRemoteCandidates()
+    if #fishNames == 0 then
+        return false, "No fish/index names found in client."
+    end
+    if #remotes == 0 then
+        return false, "No unlock/index remote exposed to client."
+    end
+
+    local fired = 0
+    for _, remote in ipairs(remotes) do
+        for _, fishName in ipairs(fishNames) do
+            pcall(function()
+                if remote:IsA("RemoteEvent") then
+                    remote:FireServer(fishName)
+                    remote:FireServer("Fish", fishName)
+                    remote:FireServer({ Name = fishName })
+                else
+                    remote:InvokeServer(fishName)
+                    remote:InvokeServer("Fish", fishName)
+                    remote:InvokeServer({ Name = fishName })
+                end
+            end)
+            fired = fired + 1
+            task.wait(0.05)
+        end
+    end
+
+    return fired > 0, "Tried " .. tostring(fired) .. " index unlock calls on " .. tostring(#remotes) .. " remote(s)."
+end
+
+-- ====================================================
+-- 21. TAB: EXTRA
+-- ====================================================
 afkSec = Tabs.Extra:AddSection("◆ 防挂机 --雪天缤纷")
 afkSec:AddToggle("NNVN_AntiAFK", {
     Title = "▶ 防挂机 --雪天缤纷", Default = false,
@@ -2393,17 +3365,6 @@ utilSec:AddToggle("NNVN_WalkOnWater", {
     end
 })
 
-spinSec = Tabs.Extra:AddSection("◆ 旋转陀螺 --雪天缤纷")
-spinSec:AddToggle("NNVN_Spinner", {
-    Title = "▶ 旋转陀螺(疯狂转圈) --雪天缤纷", Default = false,
-    Callback = function(v) getgenv().NNVN_Spinner = v end,
-})
-spinSec:AddSlider("NNVN_SpinnerSpeed", {
-    Title = "• 旋转速度(度/秒) --雪天缤纷",
-    Default = 240, Min = 60, Max = 720, Rounding = 1,
-    Callback = function(v) getgenv().NNVN_SpinnerSpeed = v end,
-})
-
 worldSec = Tabs.Extra:AddSection("◆ 世界 --雪天缤纷")
 worldSec:AddToggle("NNVN_NoClip", {
     Title = "▶ 穿墙 --雪天缤纷", Default = false,
@@ -2528,74 +3489,6 @@ startupSec:AddToggle("NNVN_AutoExecuteScript", {
     Title = "▶ 加入时自动执行脚本 --雪天缤纷", Default = true,
     Callback = function(v) getgenv().NNVN_AutoExecuteScript = v end,
 })
-
-bgmSec = Tabs.Extra:AddSection("◆ 启动BGM --雪天缤纷")
-bgmSec:AddToggle("NNVN_BGM_Enabled", {
-    Title = "▶ 启动时自动播放 --雪天缤纷", Default = true,
-    Callback = function(v) getgenv().NNVN_BGM_Enabled = v end,
-})
-bgmSec:AddInput({
-    Title = "歌曲ID --雪天缤纷",
-    Placeholder = "rbxassetid://...",
-    Value = "4727843133",
-    Callback = function(v)
-        local id = tostring(v or ""):match("%d+")
-        getgenv().NNVN_BGM_SongId = id or ""
-    end,
-})
-bgmSec:AddSlider("NNVN_BGM_Volume", {
-    Title = "• 音量 --雪天缤纷",
-    Default = 0.5, Min = 0, Max = 1, Rounding = 2,
-    Callback = function(v)
-        getgenv().NNVN_BGM_Volume = v
-        pcall(function() if getgenv().NNVN_BGM_Sound then getgenv().NNVN_BGM_Sound.Volume = v end end)
-    end,
-})
-bgmSec:AddButton({
-    Title = "▶ 立即播放 --雪天缤纷",
-    Callback = function()
-        if getgenv().NNVN_PlayBGM then getgenv().NNVN_PlayBGM() end
-    end,
-})
-bgmSec:AddButton({
-    Title = "■ 停止播放 --雪天缤纷",
-    Callback = function()
-        if getgenv().NNVN_StopBGM then getgenv().NNVN_StopBGM() end
-    end,
-})
-
--- BGM player
-local function PlayBGM()
-    pcall(function()
-        local cur = getgenv().NNVN_BGM_Sound
-        if cur then pcall(function() cur:Stop() end); cur:Destroy(); getgenv().NNVN_BGM_Sound = nil end
-        local id = getgenv().NNVN_BGM_SongId or "4727843133"
-        if tostring(id) == "" then return end
-        local s = Instance.new("Sound")
-        s.SoundId = "rbxassetid://" .. tostring(id):match("%d+")
-        s.Volume = getgenv().NNVN_BGM_Volume or 0.5
-        s.Looped = getgenv().NNVN_BGM_Loop or false
-        s.Parent = LocalPlayer:WaitForChild("PlayerGui")
-        s:Play()
-        getgenv().NNVN_BGM_Sound = s
-        if getgenv().NNVN_Notify then
-            WindUI:Notify{Title="BGM --雪天缤纷", Content="正在播放 rbxassetid://"..tostring(id), Duration=3}
-        end
-    end)
-end
-local function StopBGM()
-    pcall(function()
-        local cur = getgenv().NNVN_BGM_Sound
-        if cur then cur:Stop(); cur:Destroy(); getgenv().NNVN_BGM_Sound = nil end
-    end)
-end
-getgenv().NNVN_PlayBGM = PlayBGM
-getgenv().NNVN_StopBGM = StopBGM
-if getgenv().NNVN_BGM_Enabled then
-    task.delay(5, function()
-        pcall(function() PlayBGM() end)
-    end)
-end
 
 -- ====================================================
 -- 22. TAB: SERVER HOP
@@ -2741,9 +3634,9 @@ addHopSection(Tabs.Hop, "Taoist",     function() return ObjectExists({"NPC","Fun
 -- ====================================================
 DISCORD_INVITE = "https://discord.gg/5JJAuHRUgJ"
 DISCORD_CODE = "5JJAuHRUgJ"
-infoSec = Tabs.Info:AddSection("雪天中心 --雪天缤纷")
+infoSec = Tabs.Info:AddSection("雪天缤纷ProMax --雪天缤纷")
 infoSec:AddParagraph({ Title = "作者 --雪天缤纷", Content = "脚本作者 雪天缤纷Pro" })
-discordStatus = infoSec:AddParagraph({ Title = "社区 --雪天缤纷", Content = "正在加载邀请信息..." })
+discordStatus = infoSec:AddParagraph({ Title = "Discord --雪天缤纷", Content = "正在加载邀请信息..." })
 function UpdateDiscordInfo()
     task.spawn(function()
         local ok, data = pcall(function()
@@ -2760,10 +3653,10 @@ function UpdateDiscordInfo()
         end
     end)
 end
-infoSec:AddButton({ Title = "更新社区信息 --雪天缤纷", Icon = "refresh-cw", Callback = UpdateDiscordInfo })
-infoSec:AddButton({ Title = "复制社区邀请 --雪天缤纷", Icon = "copy", Callback = function()
+infoSec:AddButton({ Title = "更新 Discord 信息 --雪天缤纷", Icon = "refresh-cw", Callback = UpdateDiscordInfo })
+infoSec:AddButton({ Title = "复制 Discord 邀请 --雪天缤纷", Icon = "copy", Callback = function()
     pcall(function() setclipboard(DISCORD_INVITE) end)
-    if getgenv().NNVN_Notify then WindUI:Notify{Title="社区 --雪天缤纷", Content="邀请已复制！", Duration=2} end
+    if getgenv().NNVN_Notify then WindUI:Notify{Title="Discord --雪天缤纷", Content="邀请已复制！", Duration=2} end
 end })
 infoSec:AddParagraph({ Title = "版本 --雪天缤纷", Content = "v3.0 + WindUI | 更新日期："..os.date("%d/%m/%Y") })
 infoSec:AddParagraph({ Title = "阶段 2 --雪天缤纷", Content = "仅客户端点击计时。自动阶段 2 不触发远程。" })
@@ -2849,7 +3742,7 @@ end
 local function captureConfig()
     local data = {
         __theme = SelectedTheme or "Dark",
-        __background = BackgroundInputValue or "rbxassetid://133614920920944",
+        __background = BackgroundInputValue or "rbxassetid://112266995522505",
         __auto_load = AutoLoadConfig,
         __auto_save = AutoSaveConfig,
     }
@@ -2979,7 +3872,7 @@ end
 
 ConfigNameInput = ConfigSection:Input({
     Title = "配置名称 --雪天缤纷",
-    Placeholder = "输入配置名",
+    Placeholder = "Type config name",
     Value = ConfigName,
     Callback = function(value)
         ConfigName = (value and value ~= "") and value or "default"
@@ -3089,7 +3982,7 @@ SettingsTab:Section({
 BackgroundSection = SettingsTab
 
 SelectedTheme = "Dark"
-BackgroundInputValue = "rbxassetid://133614920920944"
+BackgroundInputValue = "rbxassetid://112266995522505"
 
 BackgroundSection:Dropdown({
     Title = "选择主题 --雪天缤纷",
@@ -3165,7 +4058,7 @@ getgenv().WMK = WMK
 Wf = Instance.new("TextLabel", WMK)
 Wf.Size = UDim2.new(0,300,0,28); Wf.Position = UDim2.new(0,10,0,10)
 Wf.BackgroundColor3 = Color3.fromRGB(20,20,28); Wf.BackgroundTransparency = 0.3
-Wf.TextColor3 = Color3.fromRGB(205,180,255); Wf.Text = " ◆ 雪天中心 v3 [WindUI]  雪天缤纷Pro"
+Wf.TextColor3 = Color3.fromRGB(205,180,255); Wf.Text = " ◆ NNVN Hub v3 [WindUI]  N0NAMEVN"
 Wf.Font = Enum.Font.Gotham; Wf.TextSize = 13
 Instance.new("UICorner", Wf).CornerRadius = UDim.new(0,8)
 Uis = Instance.new("UIStroke", Wf)
@@ -3177,7 +4070,7 @@ Uis.Color = Color3.fromRGB(140,100,220); Uis.Thickness = 1; Uis.Transparency = 0
 
 -- Auto Cast (fishing remote — no NPC needed, player is already at spot)
 task.spawn(function()
-    while task.wait(0.3) do
+    while task.wait(1) do
         if not getgenv().NNVN_AutoCast then continue end
         pcall(function()
             local char = LocalPlayer.Character
@@ -3532,26 +4425,7 @@ task.spawn(function()
                 VirtualInput:SendKeyEvent(true,  keycode, false, game)
                 task.wait(0.1)
                 VirtualInput:SendKeyEvent(false, keycode, false, game)
-                RestoreTouchMode()
             end
-        end
-    end
-end)
-
--- 设备模式监控：键鼠模拟类功能全部关闭的瞬间，立即恢复手机触控模式
--- （开启期间不发送触摸避免干扰，关闭后 0.15s 内拉回）
-local nnvnKeyFuncActive = false
-task.spawn(function()
-    while task.wait(0.15) do
-        local anyKey = getgenv().NNVN_AutoSkill
-            or getgenv().NNVN_AutoPhase2
-            or getgenv().NNVN_AutoBoss
-            or getgenv().NNVN_AutoTicket
-        if anyKey then
-            nnvnKeyFuncActive = true
-        elseif nnvnKeyFuncActive then
-            nnvnKeyFuncActive = false
-            RestoreTouchMode()
         end
     end
 end)
@@ -3567,6 +4441,90 @@ RunService.RenderStepped:Connect(function()
             ReplicatedStorage.Fishing:FireServer("1")
         end
     end)
+end)
+
+local namelessKeyLastPress = { A = 0, S = 0, D = 0 }
+local namelessLaneMap = {
+    ProgressionA = "A",
+    ProgressionS = "S",
+    ProgressionD = "D",
+}
+local namelessNextScanAt = 0
+local namelessNextRemoteAt = 0
+
+local function clickGuiButton(guiObject)
+    if not guiObject or not guiObject.Visible then return false end
+    local ok = pcall(function()
+        if guiObject.Activate then
+            guiObject:Activate()
+        end
+        local x = guiObject.AbsolutePosition.X + (guiObject.AbsoluteSize.X * 0.5)
+        local y = guiObject.AbsolutePosition.Y + (guiObject.AbsoluteSize.Y * 0.5)
+        VirtualInput:SendMouseButtonEvent(x, y, 0, true, game, 0)
+        VirtualInput:SendMouseButtonEvent(x, y, 0, false, game, 0)
+    end)
+    return ok
+end
+
+local function pressRhythmKey(letter)
+    local keyMap = {
+        A = Enum.KeyCode.A,
+        S = Enum.KeyCode.S,
+        D = Enum.KeyCode.D,
+    }
+    local keyCode = keyMap[letter]
+    if not keyCode then return end
+    local now = os.clock()
+    if now - (namelessKeyLastPress[letter] or 0) < 0.06 then return end
+    namelessKeyLastPress[letter] = now
+    VirtualInput:SendKeyEvent(true, keyCode, false, game)
+    task.wait(0.02)
+    VirtualInput:SendKeyEvent(false, keyCode, false, game)
+end
+
+local function handleNamelessRhythmMinigame()
+    if not getgenv().NNVN_AutoNamelessMinigame then return end
+
+    local now = os.clock()
+    if now < namelessNextScanAt then return end
+    namelessNextScanAt = now + 0.03
+
+    local fishing = MainGui and MainGui:FindFirstChild("Fishing")
+    local rhythm = fishing and fishing:FindFirstChild("Rhythm")
+    if not rhythm or not rhythm.Visible then return end
+
+    for laneName, keyLetter in pairs(namelessLaneMap) do
+        local lane = rhythm:FindFirstChild(laneName)
+        local noteFrame = lane and lane:FindFirstChild("NoteFrame")
+        local button = lane and lane:FindFirstChild("Button")
+
+        if noteFrame and button and noteFrame.Visible and button.Visible then
+            local buttonCenterY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y * 0.5)
+            local hitWindow = math.max(24, math.floor(button.AbsoluteSize.Y * 0.7))
+
+            for _, child in ipairs(noteFrame:GetChildren()) do
+                if child:IsA("GuiObject") and child.Visible then
+                    local noteCenterY = child.AbsolutePosition.Y + (child.AbsoluteSize.Y * 0.5)
+                    if math.abs(noteCenterY - buttonCenterY) <= hitWindow then
+                        pressRhythmKey(keyLetter)
+                        clickGuiButton(button)
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    if now >= namelessNextRemoteAt then
+        namelessNextRemoteAt = now + 0.08
+        pcall(function()
+            ReplicatedStorage.Events.RhythmHit:FireServer("hit")
+        end)
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    handleNamelessRhythmMinigame()
 end)
 
 -- CharacterAdded
@@ -3643,10 +4601,8 @@ function p2ClickLoop()
             local barCenterX = bar.AbsolutePosition.X + bar.AbsoluteSize.X * 0.5
             local hbLeft     = hitbox.AbsolutePosition.X
             local hbRight    = hbLeft + hitbox.AbsoluteSize.X
-            local hbCenterX  = hbLeft + hitbox.AbsoluteSize.X * 0.5
-            local hbCenterY  = hitbox.AbsolutePosition.Y + hitbox.AbsoluteSize.Y * 0.5
+            local margin     = math.max(5, math.floor(hitbox.AbsoluteSize.X * 0.04))
 
-            -- 速度检测：Bar 移动越快，点击频率越高
             local velocity = 0
             if enzoLastBarX and enzoLastBarAt > 0 then
                 local dt = math.max(0.0001, now - enzoLastBarAt)
@@ -3655,21 +4611,14 @@ function p2ClickLoop()
             enzoLastBarX = barCenterX
             enzoLastBarAt = now
 
-            -- 超精准判定（点错扣血机制）：只在 Bar 中心贴近 Hitbox 中心判定线时才点击。
-            -- 中心对齐窗口 = Hitbox 宽度的 ±30%，Bar 偏离中心立即停止——绝不提前、不延后、不点空位。
-            local hbCenterX = hbLeft + hitbox.AbsoluteSize.X * 0.5
-            local alignHalf = math.max(4, hitbox.AbsoluteSize.X * 0.3)
-            if math.abs(barCenterX - hbCenterX) <= alignHalf then
-                -- 点击必须落在 Bar 本体中心：X = Bar 中心（收窄到 Hitbox 内），Y = Hitbox 中心
-                local clickInterval = velocity >= 1200 and 0.014 or velocity >= 900 and 0.016 or velocity >= 550 and 0.02 or 0.026
+            if barCenterX >= (hbLeft - margin) and barCenterX <= (hbRight + margin) then
+                local clickInterval = velocity >= 900 and 0.014 or velocity >= 550 and 0.018 or 0.024
                 if now - enzoLastClick >= clickInterval then
                     enzoLastClick = now
                     pcall(function()
-                        local x = math.floor(math.clamp(barCenterX, hbLeft + 1, hbRight - 1))
-                        local y = math.floor(hbCenterY)
+                        local x, y = getGuiCenter(hitbox)
                         VirtualInput:SendMouseButtonEvent(x, y, 0, true, game, 0)
                         VirtualInput:SendMouseButtonEvent(x, y, 0, false, game, 0)
-                        RestoreTouchMode()
                     end)
                 end
             end
@@ -3727,7 +4676,7 @@ task.spawn(function()
     end
 end)
 
--- Auto Buy Bait with threshold — 远程直购（不再强制传送）
+-- Auto Buy Bait with threshold — [PROX] TP near seller on each purchase
 task.spawn(function()
     while task.wait(1) do
         if not getgenv().NNVN_AutoBuyBait then continue end
@@ -3740,7 +4689,8 @@ task.spawn(function()
         local bait = baitFolder:FindFirstChild(baitName)
         if bait and bait:IsA("NumberValue") and bait.Value < threshold then
             pcall(function()
-                -- 远程直购（无需传送/靠近NPC，避免强制传送）
+                -- [PROX] TP near bait seller before buying
+                TPNearBaitSeller()
                 ReplicatedStorage.Events.BuyBait:FireServer(baitName, getgenv().NNVN_BaitQuantity or 10)
                 WindUI:Notify{Title="自动购买 --雪天缤纷", Content="已购买 "..(getgenv().NNVN_BaitQuantity or 10).."x "..baitName, Duration=2}
             end)
@@ -3758,15 +4708,7 @@ UserInputService.JumpRequest:Connect(function()
 end)
 
 -- Fly mode update
-RunService.RenderStepped:Connect(function(dt)
-    -- 旋转陀螺：角色疯狂转圈
-    if getgenv().NNVN_Spinner and LocalPlayer.Character then
-        local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            local speed = getgenv().NNVN_SpinnerSpeed or 240
-            hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(speed) * math.min(dt, 0.1), 0)
-        end
-    end
+RunService.RenderStepped:Connect(function()
     if getgenv().NNVN_FlyMode and flyState.flying and flyState.bg and flyState.bv and LocalPlayer.Character then
         local h = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if h then
@@ -3803,106 +4745,11 @@ end)
 Window:SelectTab(1)
 if getgenv().NNVN_Notify then
     WindUI:Notify{
-        Title    = "雪天中心 v3 [WindUI] --雪天缤纷",
+        Title    = "雪天缤纷ProMax v3 [WindUI] --雪天缤纷",
         Content  = T.loaded.."\ndiscord.gg/5JJAuHRUgJ\nWindUI loaded",
         Duration = 6
     }
-    -- 📢 启动更新公告
-    task.delay(4, function()
-        pcall(function()
-            WindUI:Notify{
-                Title    = "📢 更新公告 --雪天缤纷",
-                Content  = "雪天中心 v3.1 更新公告\n\n✦ 新增：旋转陀螺 / 启动BGM / 小游戏延迟补偿\n✦ 新增：小游戏【智能直过】模式\n✦ 修复：购买饵料强制传送 / 手机摇杆消失\n✦ 优化：全界面汉化补全 / UI字体升级\n\n作者：雪天缤纷Pro",
-                Duration = 12,
-            }
-        end)
-    end)
 end
-
--- ====================================================
--- 轻量版更新公告（确认后进入主脚本）
--- ====================================================
-task.spawn(function()
-    task.wait(1.5)
-    pcall(function()
-        local sg = Instance.new("ScreenGui")
-        sg.Name = "NNVN_LiteAnnounce"
-        sg.ResetOnSpawn = false
-        sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        sg.DisplayOrder = 200
-        sg.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-        local bg = Instance.new("Frame")
-        bg.Size = UDim2.fromScale(1, 1)
-        bg.BackgroundColor3 = Color3.fromRGB(6, 6, 18)
-        bg.BackgroundTransparency = 0.12
-        bg.Parent = sg
-
-        local card = Instance.new("Frame")
-        card.AnchorPoint = Vector2.new(0.5, 0.5)
-        card.Position = UDim2.fromScale(0.5, 0.5)
-        card.Size = UDim2.fromOffset(420, 300)
-        card.BackgroundColor3 = Color3.fromRGB(20, 15, 46)
-        card.BorderSizePixel = 0
-        local uc = Instance.new("UICorner"); uc.CornerRadius = UDim.new(0, 14); uc.Parent = card
-        card.Parent = bg
-
-        local title = Instance.new("TextLabel")
-        title.Size = UDim2.fromScale(1, 0.18)
-        title.BackgroundTransparency = 1
-        title.Font = Enum.Font.GothamBold
-        title.TextSize = 22
-        title.Text = "雪天中心 轻量版"
-        title.TextColor3 = Color3.fromRGB(255, 214, 90)
-        title.Parent = card
-
-        local sub = Instance.new("TextLabel")
-        sub.Position = UDim2.fromScale(0, 0.18)
-        sub.Size = UDim2.fromScale(1, 0.08)
-        sub.BackgroundTransparency = 1
-        sub.Font = Enum.Font.Gotham
-        sub.TextSize = 13
-        sub.Text = "v1.1 data | 更新公告"
-        sub.TextColor3 = Color3.fromRGB(180, 170, 220)
-        sub.Parent = card
-
-        local content = Instance.new("TextLabel")
-        content.Position = UDim2.fromScale(0.06, 0.28)
-        content.Size = UDim2.fromScale(0.88, 0.5)
-        content.BackgroundTransparency = 1
-        content.Font = Enum.Font.Gotham
-        content.TextSize = 13.5
-        content.TextXAlignment = Enum.TextXAlignment.Left
-        content.TextYAlignment = Enum.TextYAlignment.Top
-        content.TextWrapped = true
-        content.Text = "本版本功能：\n\n✦ 自动抛竿 / 锚点 / 自动装备\n✦ 移速修改\n✦ 自动购买鱼饵\n✦ 恩佐 Boss 战（自动开战 + 精准拉拔河）\n\n轻量版 · 仅供授权玩家使用"
-        content.TextColor3 = Color3.fromRGB(232, 230, 255)
-        content.Parent = card
-
-        local btn = Instance.new("TextButton")
-        btn.AnchorPoint = Vector2.new(0.5, 0)
-        btn.Position = UDim2.fromScale(0.5, 0.86)
-        btn.Size = UDim2.fromOffset(180, 38)
-        btn.BackgroundColor3 = Color3.fromRGB(96, 62, 220)
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = 16
-        btn.Text = "确认进入"
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        local uc2 = Instance.new("UICorner"); uc2.CornerRadius = UDim.new(0, 9); uc2.Parent = btn
-        btn.Parent = card
-
-        local done = false
-        local function onConfirm()
-            if done then return end
-            done = true
-            sg:Destroy()
-        end
-        btn.Activated:Connect(onConfirm)
-        btn.MouseButton1Click:Connect(onConfirm)
-        btn.TouchTap:Connect(onConfirm)
-        task.delay(60, onConfirm) -- 防卡死兜底
-    end)
-end)
 
 getgenv().NNVN_Loaded = true
 
